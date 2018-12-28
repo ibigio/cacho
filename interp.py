@@ -1,8 +1,8 @@
 from cacho import *
 
-a = Player('a')
-b = Player('b')
+a = Player('Ilan')
+b = SafeNaivePlayerAI('Anton')
 
 g = Game([a,b])
 
-r = Round([a,b],a)
+r = Round([a,b])
