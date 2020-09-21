@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from cacho import *
 
 a = Player('Ilan')

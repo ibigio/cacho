@@ -1,6 +1,5 @@
-import math, random
+import math, random, re
 import numpy as np
-import re
 
 class Game:
 	
@@ -10,16 +9,16 @@ class Game:
 		self.rounds = []
 
 	def play(self):
-		starting_player_indx = 0
+		starting_player_index = 0
 		while len(self.active_players) > 1:
 
-			print(starting_player_indx)
-			r = Round(self.active_players, starting_player_indx)
+			print(starting_player_index)
+			r = Round(self.active_players, starting_player_index)
 			loser = r.play_round()
-			self.roudnds.append(r)
+			self.rounds.append(r)
 			if len(self.active_players[loser].cup.dice) is 0:
 				del self.active_players[loser]
-			starting_player_indx = loser % len(self.active_players)
+			starting_player_index = loser % len(self.active_players)
 
 		print('Player',self.active_players[0],'wins the game with',len(self.active_players[0].cup.dice),'dice!')
 		return self.active_players[0]
@@ -28,14 +27,14 @@ class Game:
 
 class Round:
 	
-	def __init__(self, players, starting_player_indx=0):
+	def __init__(self, players, starting_player_index=0):
 		self.players = players
 		self.__hands = [player.cup.shake().dice for player in self.players]
 		self.total_dice = sum([len(h) for h in self.__hands])
 		self.calls = []
 		self.cur_call = None
-		self.starting_player_indx = starting_player_indx
-		self.cur_player_indx = starting_player_indx
+		self.starting_player_index = starting_player_index
+		self.cur_player_indx = starting_player_index
 		# self.direction = None
 
 	def print_round(self):
@@ -44,7 +43,7 @@ class Round:
 		print('Dice:', self.total_dice)
 		# print('->' if self.direction is 1 else '<-')
 		print('Calls:', [str(call) for call in self.calls])
-		print('Starter:', self.starting_player_indx)
+		print('Starter:', self.starting_player_index)
 		print(self.players[self.prev_player()], 'calls', self.cur_call)
 		print('Player', self.players[self.cur_player_indx], 'calls:')
 
