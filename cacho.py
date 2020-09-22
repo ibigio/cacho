@@ -217,6 +217,58 @@ class SafeNaivePlayerAI:
 	def prob_call(self,total, call):
 		return self.prob_at_least(total, call.q, call.v)
 
+	def step(self, hand, prev_call, total):
+		total = total - len(hand)
+
+		# starting call
+		if prev_call == None:
+			start_q = max(math.floor(total/3) - 1, 1)
+			start_v = random.randint(2,6)
+			call = Call(start_q + len([x for x in hand if x == start_v or x == 1]), start_v)
+			print('Start with', call)
+			return
+			# return call
+
+		prev_prob = self.prob_at_least(total, prev_call.q - len([x for x in hand if x == prev_call.v or x == 1]), prev_call.v)
+		# print('Oponent called', prev_call, 'with', prev_prob)
+
+		prev_q = (prev_call.q * 2) + 1 if prev_call.v == 1 else prev_call.q
+		prev_v = 0 if prev_call.v == 1 else prev_call.v
+
+		# best in same quantity
+		m = self.mode([x for x in hand if x > prev_v and x != 1])
+		if m == 0 and 1 in hand:
+			m = random.randint(prev_v + 1,6) if prev_v < 6 else 0
+		bisq = Call(prev_q, m)
+
+		# best in next quantity
+		m = self.mode([x for x in hand if x <= prev_v and x != 1])
+		if m == 0 and 1 in hand:
+			print(prev_v)
+			m = random.randint(2,prev_v + 1)
+		binq = Call(prev_q + 1, m)
+
+		# ace call
+		ace_q = math.floor(prev_q / 2) + 1
+		ace_call = Call(ace_q, 1)
+
+		# determine best call
+		possible_calls = [bisq, binq, ace_call]
+		probs = [self.prob_call(total, Call(call.q - len([x for x in hand if x == call.v or (x == 1)]), call.v)) for call in possible_calls]
+		opt_i = np.argmax(probs)
+
+		# print(possible_calls)
+		# print(probs)
+		# print(prev_prob)
+		# print("Best call is", possible_calls[opt_i], 'with', probs[opt_i])
+		# if prev_prob > (1 - probs[opt_i]):
+		if (probs[opt_i] * 1.4) > (1-prev_prob):
+			print('You should call', possible_calls[opt_i], f'({int(probs[opt_i] * 100)}% win)')
+			# return possible_calls[opt_i]
+		else:
+			print(f'You should pull ({int((1 - probs[opt_i]) * 100)}% win)')
+			# return Call(0,0)
+
 	def make_call(self, game_round):
 		hand = self.cup.dice
 		total = game_round.total_dice - len(self.cup.dice)
@@ -264,4 +316,3 @@ class SafeNaivePlayerAI:
 		else:
 			print('You should pull.')
 			return Call(0,0)
-
