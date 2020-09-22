@@ -16,7 +16,7 @@ class Game:
 			r = Round(self.active_players, starting_player_index)
 			loser = r.play_round()
 			self.rounds.append(r)
-			if len(self.active_players[loser].cup.dice) is 0:
+			if len(self.active_players[loser].cup.dice) == 0:
 				del self.active_players[loser]
 			starting_player_index = loser % len(self.active_players)
 
@@ -41,7 +41,7 @@ class Round:
 		print('==================')
 		print('Players:', [p.name for p in self.players])
 		print('Dice:', self.total_dice)
-		# print('->' if self.direction is 1 else '<-')
+		# print('->' if self.direction == 1 else '<-')
 		print('Calls:', [str(call) for call in self.calls])
 		print('Starter:', self.starting_player_index)
 		print(self.players[self.prev_player()], 'calls', self.cur_call)
@@ -59,7 +59,7 @@ class Round:
 			self.calls.append(call)
 
 			# handle pull
-			if call.q is 0:
+			if call.q == 0:
 				break
 
 			# next player
@@ -76,28 +76,28 @@ class Round:
 	def determine_loser(self):
 		count = 0
 		for hand in self.__hands:
-			count += len([x for x in hand if x is 1 or x is self.cur_call.v])
+			count += len([x for x in hand if x == 1 or x == self.cur_call.v])
 		if count >= self.cur_call.q:
 			return self.cur_player_indx
 		else:
 			return self.prev_player()
 
 	def call_is_valid(self, call):
-		if call is None:
+		if call == None:
 			return False
-		# this is a pull
-		if call.q is 0:
+		# this == a pull
+		if call.q == 0:
 			return True
-		if call.v is 0:
+		if call.v == 0:
 			return False
-		if self.cur_call is None:
+		if self.cur_call == None:
 			return True
 
-		minv = 0 if self.cur_call.v is 1 else self.cur_call.v
-		minq = (self.cur_call.q * 2) + 1 if self.cur_call.v is 1 else self.cur_call.q
+		minv = 0 if self.cur_call.v == 1 else self.cur_call.v
+		minq = (self.cur_call.q * 2) + 1 if self.cur_call.v == 1 else self.cur_call.q
 
 		# deal with aces
-		if call.v is 1:
+		if call.v == 1:
 			print(1)
 			if call.q < math.floor(minq / 2) + 1:
 				print(2)
@@ -141,16 +141,16 @@ class Player:
 	def make_call(self, game_round):
 		print(self.cup.dice)
 		call_array = []
-		while len(call_array) is not 2:	
+		while len(call_array) != 2:	
 			call_array = re.findall(r'\d+',input())
 		return Call(int(call_array[0]), int(call_array[1]))
 
 	# def choose_direction(self):
 	# 	print('Choose direction (0 for Left, 1 for Right):')
 	# 	direction_array = []
-	# 	while len(call_array) is not 1:	
+	# 	while len(call_array) != 1:	
 	# 		call_array = re.findall(r'\d',input())
-	# 	return 1 if call_array[0] is 1 else -1
+	# 	return 1 if call_array[0] == 1 else -1
 
 
 
@@ -193,7 +193,7 @@ class SafeNaivePlayerAI:
 		return self.name
 
 	def mode(self,l):
-		if len(l) is 0:
+		if len(l) == 0:
 			return 0
 		return max(set(l), key=l.count)
 
@@ -204,10 +204,10 @@ class SafeNaivePlayerAI:
 		return math.factorial(n) / (math.factorial(k) * math.factorial(n-k))
 
 	def prob_at_least(self,n, k, v):
-		if k > n or v is 0:
+		if k > n or v == 0:
 			return 0
 
-		p = (1/6) if v is 1 else (1/3)
+		p = (1/6) if v == 1 else (1/3)
 		total_sum = 0
 
 		for i in range(k):
@@ -223,26 +223,26 @@ class SafeNaivePlayerAI:
 		prev_call = game_round.cur_call
 
 		# starting call
-		if prev_call is None:
+		if prev_call == None:
 			start_q = max(math.floor(total/3) - 1, 1)
 			start_v = random.randint(2,6)
-			return Call(start_q + len([x for x in hand if x is start_v or x is 1]), start_v)
+			return Call(start_q + len([x for x in hand if x == start_v or x == 1]), start_v)
 
-		prev_prob = self.prob_at_least(total, prev_call.q - len([x for x in hand if x is prev_call.v or x is 1]), prev_call.v)
+		prev_prob = self.prob_at_least(total, prev_call.q - len([x for x in hand if x == prev_call.v or x == 1]), prev_call.v)
 		print('Oponent called', prev_call, 'with', prev_prob)
 
-		prev_q = (prev_call.q * 2) + 1 if prev_call.v is 1 else prev_call.q
-		prev_v = 0 if prev_call.v is 1 else prev_call.v
+		prev_q = (prev_call.q * 2) + 1 if prev_call.v == 1 else prev_call.q
+		prev_v = 0 if prev_call.v == 1 else prev_call.v
 
 		# best in same quantity
-		m = self.mode([x for x in hand if x > prev_v and x is not 1])
-		if m is 0 and 1 in hand:
+		m = self.mode([x for x in hand if x > prev_v and x != 1])
+		if m == 0 and 1 in hand:
 			m = random.randint(prev_v + 1,6) if prev_v < 6 else 0
 		bisq = Call(prev_q, m)
 
 		# best in next quantity
-		m = self.mode([x for x in hand if x <= prev_v and x is not 1])
-		if m is 0 and 1 in hand:
+		m = self.mode([x for x in hand if x <= prev_v and x != 1])
+		if m == 0 and 1 in hand:
 			m = random.randint(2,prev_v + 1)
 		binq = Call(prev_q + 1, m)
 
@@ -252,7 +252,7 @@ class SafeNaivePlayerAI:
 
 		# determine best call
 		possible_calls = [bisq, binq, ace_call]
-		probs = [self.prob_call(total, Call(call.q - len([x for x in hand if x is call.v or (x is 1)]), call.v)) for call in possible_calls]
+		probs = [self.prob_call(total, Call(call.q - len([x for x in hand if x == call.v or (x == 1)]), call.v)) for call in possible_calls]
 		opt_i = np.argmax(probs)
 
 		print(possible_calls)
